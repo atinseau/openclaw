@@ -12,17 +12,12 @@ if [ -z "$OPENCLAW_DOMAIN" ]; then
 fi
 
 # ── Fix volume ownership (only thing we do as root) ─────────────
+# docker exec and Coolify terminal run as root — any CLI command
+# (pairing approve, agents add, etc.) creates files as root:root.
+# We fix everything recursively on every boot to be safe.
 echo "Fixing volume ownership …"
-chown node:node "$CONFIG_DIR"
 mkdir -p "$WORKSPACE_DIR"
-chown node:node "$WORKSPACE_DIR"
-find "$CONFIG_DIR" -maxdepth 1 -not -path "$CONFIG_DIR" -exec chown node:node {} +
-# Fix credentials/ recursively — docker exec runs as root and any
-# CLI command (e.g. openclaw pairing approve) creates files as root
-# inside this dir, making them unreadable by the gateway (node).
-if [ -d "$CONFIG_DIR/credentials" ]; then
-  chown -R node:node "$CONFIG_DIR/credentials"
-fi
+chown -R node:node "$CONFIG_DIR"
 
 # ── Drop to node: seed config then exec the CMD ────────────────
 exec su -s /bin/sh node -c '

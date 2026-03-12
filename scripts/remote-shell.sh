@@ -13,7 +13,12 @@ if [ -f "$ENV_FILE" ]; then
   . "$ENV_FILE"
 fi
 
-REMOTE="${OPENCLAW_REMOTE_HOST:?Set OPENCLAW_REMOTE_HOST in .env}"
+REMOTE="${OPENCLAW_REMOTE_HOST:-}"
+if [ -z "$REMOTE" ]; then
+  echo "Error: OPENCLAW_REMOTE_HOST is not set in .env file." >&2
+  exit 1
+fi
+
 CONTAINER=$(ssh "$REMOTE" "sudo docker ps --format '{{.Names}}' | grep -i claw" 2>/dev/null | head -1)
 
 if [ -z "$CONTAINER" ]; then
