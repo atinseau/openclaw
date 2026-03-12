@@ -28,8 +28,12 @@ RUN apt-get update && \
       # wget \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Custom skills / scripts / config ────────────────────────────
-# COPY skills/ /app/skills/
+# ── Custom skills ───────────────────────────────────────────────
+# Copied into the bundled skills directory so OpenClaw discovers them
+# automatically at startup (no config needed).
+COPY --chown=node:node skills/ /app/skills/
+
+# ── Custom scripts / config ─────────────────────────────────────
 # COPY scripts/ /app/custom-scripts/
 
 # ── Back to non-root for runtime (security) ─────────────────────
