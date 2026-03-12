@@ -26,14 +26,20 @@ services:
       CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      # Browserless CDP URL — points at the companion container
+      BROWSERLESS_CDP_URL: http://browserless:3000
     volumes:
       - openclaw-config:/home/node/.openclaw
       - openclaw-workspace:/home/node/.openclaw/workspace
+
     ports:
       - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
       - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
     init: true
     restart: unless-stopped
+    depends_on:
+      browserless:
+        condition: service_healthy
     command:
       [
         "node",
@@ -57,6 +63,38 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  # ── Browserless — headless Chromium with CDP ───────────────────
+  # Provides a remote CDP endpoint that OpenClaw connects to for
+  # browser automation (snapshots, screenshots, click/type, etc.).
+  # Docs: https://docs.browserless.io/
+  browserless:
+    image: ghcr.io/browserless/chromium:latest
+    environment:
+      # Browserless token — set in Coolify env vars or leave default
+      TOKEN: ${BROWSERLESS_TOKEN:-openclaw-local}
+      # Connection and concurrency settings
+      CONCURRENT: ${BROWSERLESS_CONCURRENT:-2}
+      QUEUED: ${BROWSERLESS_QUEUED:-5}
+      TIMEOUT: ${BROWSERLESS_TIMEOUT:-120000}
+      # Health check endpoint
+      HEALTH: "true"
+    ports:
+      - "${BROWSERLESS_PORT:-3000}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--spider",
+          "http://127.0.0.1:3000/health",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   openclaw-config:

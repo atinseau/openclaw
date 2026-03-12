@@ -12,5 +12,21 @@
     "load": {
       "extraDirs": ["/app/custom-skills"]
     }
+  },
+  "browser": {
+    "enabled": true,
+    "defaultProfile": "browserless",
+    "headless": true,
+    "remoteCdpTimeoutMs": 3000,
+    "remoteCdpHandshakeTimeoutMs": 5000,
+    "ssrfPolicy": {
+      "dangerouslyAllowPrivateNetwork": true
+    },
+    "profiles": {
+      "browserless": {
+        "cdpUrl": "__BROWSERLESS_CDP_URL__",
+        "color": "#00AA00"
+      }
+    }
   }
 }

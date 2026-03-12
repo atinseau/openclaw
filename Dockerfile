@@ -5,9 +5,16 @@
 # The upstream image already contains:
 #   - Node 22 (bookworm)
 #   - Built OpenClaw gateway + CLI (dist/, node_modules/, openclaw.mjs)
+#   - playwright-core (used to connect to remote CDP endpoints)
 #   - pnpm, git, curl, openssl, procps
 #   - Non-root user "node" (uid 1000)
 #   - CMD: node openclaw.mjs gateway --allow-unconfigured
+#
+# Browser note:
+#   playwright-core is already bundled in the upstream image. When using a
+#   remote CDP provider (Browserless), playwright-core connects over CDP
+#   without needing a local Chromium binary. No extra Playwright install
+#   is required.
 #
 # To pin a specific version instead of following latest:
 #   FROM ghcr.io/openclaw/openclaw:2025.7.15
