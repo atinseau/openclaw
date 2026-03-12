@@ -13,6 +13,8 @@ if [ -f "$ENV_FILE" ]; then
   . "$ENV_FILE"
 fi
 
+echo "salut"
+
 REMOTE="${OPENCLAW_REMOTE_HOST:-}"
 if [ -z "$REMOTE" ]; then
   echo "Error: OPENCLAW_REMOTE_HOST is not set in .env file." >&2
