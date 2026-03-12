@@ -44,7 +44,6 @@ RUN chmod 755 /app/entrypoint.sh
 # ── Custom scripts / config ─────────────────────────────────────
 # COPY scripts/ /app/custom-scripts/
 
-# ── Back to non-root for runtime (security) ─────────────────────
-USER node
-
+# Entrypoint runs as root to fix volume permissions, then drops to
+# the "node" user before executing the CMD.
 ENTRYPOINT ["/app/entrypoint.sh"]
