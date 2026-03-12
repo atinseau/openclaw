@@ -26,12 +26,11 @@ services:
       CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
-      # Browserless CDP URL — points at the companion container
-      BROWSERLESS_CDP_URL: http://browserless:3000
+      # Browserless CDP URL — points at the companion container, with auth token
+      BROWSERLESS_CDP_URL: http://browserless:3000?token=${BROWSERLESS_TOKEN:-openclaw-local}
     volumes:
       - openclaw-config:/home/node/.openclaw
       - openclaw-workspace:/home/node/.openclaw/workspace
-
     ports:
       - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
       - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
@@ -85,11 +84,8 @@ services:
     healthcheck:
       test:
         [
-          "CMD",
-          "wget",
-          "-q",
-          "--spider",
-          "http://127.0.0.1:3000/health",
+          "CMD-SHELL",
+          "curl -sf http://127.0.0.1:3000/pressure?token=$TOKEN",
         ]
       interval: 15s
       timeout: 5s
