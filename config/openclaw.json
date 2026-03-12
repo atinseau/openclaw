@@ -4,7 +4,7 @@
     "bind": "lan",
     "controlUi": {
       "dangerouslyAllowHostHeaderOriginFallback": false,
-      "dangerouslyDisableDeviceAuth": true,
+      "dangerouslyDisableDeviceAuth": false,
       "allowedOrigins": ["https://__OPENCLAW_DOMAIN__"]
     }
   },
