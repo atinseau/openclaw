@@ -38,12 +38,13 @@ COPY --chown=node:node skills/ /app/custom-skills/
 # proxy (Coolify/Traefik/Caddy). On first boot the entrypoint copies
 # it to the persistent volume if no openclaw.json exists yet.
 COPY --chown=node:node config/openclaw.json /app/config/openclaw.json
-COPY --chown=root:root entrypoint.sh /app/entrypoint.sh
-RUN chmod 755 /app/entrypoint.sh
+COPY --chown=node:node scripts/setup-config.sh /app/scripts/setup-config.sh
+COPY --chown=root:root scripts/entrypoint.sh /app/scripts/entrypoint.sh
+RUN chmod 755 /app/scripts/entrypoint.sh /app/scripts/setup-config.sh
 
 # ── Custom scripts / config ─────────────────────────────────────
 # COPY scripts/ /app/custom-scripts/
 
 # Entrypoint runs as root to fix volume permissions, then drops to
 # the "node" user before executing the CMD.
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]
