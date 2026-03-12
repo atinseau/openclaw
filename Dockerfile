@@ -37,7 +37,7 @@ COPY --chown=node:node skills/ /app/skills/
 # The seed config provides sane defaults for running behind a reverse
 # proxy (Coolify/Traefik/Caddy). On first boot the entrypoint copies
 # it to the persistent volume if no openclaw.json exists yet.
-COPY --chown=node:node config/openclaw.seed.json /app/config/openclaw.seed.json
+COPY --chown=node:node config/openclaw.json /app/config/openclaw.json
 COPY --chown=root:root entrypoint.sh /app/entrypoint.sh
 RUN chmod 755 /app/entrypoint.sh
 
