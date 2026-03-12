@@ -29,9 +29,9 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Custom skills ───────────────────────────────────────────────
-# Copied into the bundled skills directory so OpenClaw discovers them
-# automatically at startup (no config needed).
-COPY --chown=node:node skills/ /app/skills/
+# Kept separate from bundled skills (/app/skills/) to avoid conflicts.
+# Discovered via skills.load.extraDirs in config/openclaw.json.
+COPY --chown=node:node skills/ /app/custom-skills/
 
 # ── Seed config + entrypoint ────────────────────────────────────
 # The seed config provides sane defaults for running behind a reverse

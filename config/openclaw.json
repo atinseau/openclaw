@@ -3,7 +3,13 @@
     "mode": "local",
     "bind": "lan",
     "controlUi": {
+      "dangerouslyAllowHostHeaderOriginFallback": false,
       "allowedOrigins": ["https://__OPENCLAW_DOMAIN__"]
+    }
+  },
+  "skills": {
+    "load": {
+      "extraDirs": ["/app/custom-skills"]
     }
   }
 }
