@@ -25,4 +25,12 @@ EOF
   echo "$MERGED" > "$CONFIG_FILE"
 fi
 
+# ── Safety net: let openclaw doctor remove any invalid/stale keys ──
+# This catches schema violations such as keys that were written by a
+# previous seed but are no longer recognised by the current version.
+if command -v openclaw >/dev/null 2>&1; then
+  echo "Running openclaw doctor --fix …"
+  openclaw doctor --fix 2>&1 || true
+fi
+
 echo "Config ready."
