@@ -79,8 +79,8 @@ services:
       TIMEOUT: ${BROWSERLESS_TIMEOUT:-120000}
       # Health check endpoint
       HEALTH: "true"
-    ports:
-      - "${BROWSERLESS_PORT:-3000}:3000"
+    # No host port needed — OpenClaw reaches Browserless via the
+    # internal Docker network (http://browserless:3000).
     restart: unless-stopped
     healthcheck:
       test:
