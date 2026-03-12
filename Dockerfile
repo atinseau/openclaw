@@ -33,8 +33,18 @@ RUN apt-get update && \
 # automatically at startup (no config needed).
 COPY --chown=node:node skills/ /app/skills/
 
+# ── Seed config + entrypoint ────────────────────────────────────
+# The seed config provides sane defaults for running behind a reverse
+# proxy (Coolify/Traefik/Caddy). On first boot the entrypoint copies
+# it to the persistent volume if no openclaw.json exists yet.
+COPY --chown=node:node config/openclaw.seed.json /app/config/openclaw.seed.json
+COPY --chown=root:root entrypoint.sh /app/entrypoint.sh
+RUN chmod 755 /app/entrypoint.sh
+
 # ── Custom scripts / config ─────────────────────────────────────
 # COPY scripts/ /app/custom-scripts/
 
 # ── Back to non-root for runtime (security) ─────────────────────
 USER node
+
+ENTRYPOINT ["/app/entrypoint.sh"]
