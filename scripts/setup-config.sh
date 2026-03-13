@@ -25,12 +25,19 @@ EOF
   echo "$MERGED" > "$CONFIG_FILE"
 fi
 
-# ── Safety net: let openclaw doctor remove any invalid/stale keys ──
+# ── Safety net: validate config, run doctor --fix only if invalid ──
 # This catches schema violations such as keys that were written by a
 # previous seed but are no longer recognised by the current version.
-if command -v openclaw >/dev/null 2>&1; then
-  echo "Running openclaw doctor --fix …"
-  openclaw doctor --fix 2>&1 || true
+echo "Validating config …"
+if ! openclaw config validate 2>&1; then
+  echo "Config invalid — running doctor --fix …"
+  openclaw doctor --fix --non-interactive 2>&1 || true
+
+  echo "Re-validating config …"
+  if ! openclaw config validate 2>&1; then
+    echo "ERROR: config still invalid after doctor --fix — fix openclaw.json manually and redeploy."
+    exit 1
+  fi
 fi
 
 echo "Config ready."

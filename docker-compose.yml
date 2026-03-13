@@ -20,12 +20,17 @@ services:
       HOME: /home/node
       TERM: xterm-256color
       NODE_ENV: production
+      # Startup optimisation — cache compiled bytecode + skip CLI self-respawn
+      NODE_COMPILE_CACHE: /var/tmp/openclaw-compile-cache
+      OPENCLAW_NO_RESPAWN: "1"
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:?Set OPENCLAW_GATEWAY_TOKEN in Coolify env vars}
       OPENCLAW_DOMAIN: ${SERVICE_FQDN_OPENCLAW_GATEWAY:-}
       OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: ${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}
       CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      # Gemini API key — used for memory search embeddings
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       # Browserless CDP URL — points at the companion container, with auth token
       BROWSERLESS_CDP_URL: http://browserless:3000?token=${BROWSERLESS_TOKEN:-openclaw-local}
     volumes:

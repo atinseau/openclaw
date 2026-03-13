@@ -40,6 +40,13 @@ RUN apt-get update && \
 # Discovered via skills.load.extraDirs in config/openclaw.json.
 COPY --chown=node:node skills/ /app/custom-skills/
 
+# ── Startup optimization ────────────────────────────────────────
+# Cache compiled bytecode so repeated CLI runs skip recompilation.
+# Skip the self-respawn dance to avoid double-startup overhead.
+ENV NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
+ENV OPENCLAW_NO_RESPAWN=1
+RUN mkdir -p /var/tmp/openclaw-compile-cache && chown node:node /var/tmp/openclaw-compile-cache
+
 # ── Seed config + entrypoint ────────────────────────────────────
 # The seed config provides sane defaults for running behind a reverse
 # proxy (Coolify/Traefik/Caddy). On first boot the entrypoint copies
