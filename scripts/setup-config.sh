@@ -41,3 +41,21 @@ if ! openclaw config validate 2>&1; then
 fi
 
 echo "Config ready."
+
+# ── Seed avatars into the persistent workspace ──────────────────
+# Copy bundled avatars to the workspace volume if they don't already
+# exist, so IDENTITY.md can reference avatars/jarvis.png.
+WORKSPACE_DIR="/home/node/.openclaw/workspace"
+AVATARS_SRC="/app/avatars"
+AVATARS_DST="$WORKSPACE_DIR/avatars"
+
+if [ -d "$AVATARS_SRC" ]; then
+  mkdir -p "$AVATARS_DST"
+  for f in "$AVATARS_SRC"/*; do
+    fname="$(basename "$f")"
+    if [ ! -f "$AVATARS_DST/$fname" ]; then
+      echo "Seeding avatar: $fname"
+      cp "$f" "$AVATARS_DST/$fname"
+    fi
+  done
+fi

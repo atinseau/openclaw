@@ -47,6 +47,11 @@ ENV NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
 ENV OPENCLAW_NO_RESPAWN=1
 RUN mkdir -p /var/tmp/openclaw-compile-cache && chown node:node /var/tmp/openclaw-compile-cache
 
+# ── Avatars ─────────────────────────────────────────────────────
+# Baked into the image; setup-config.sh seeds them into the
+# persistent workspace volume on first boot.
+COPY --chown=node:node avatars/ /app/avatars/
+
 # ── Seed config + entrypoint ────────────────────────────────────
 # The seed config provides sane defaults for running behind a reverse
 # proxy (Coolify/Traefik/Caddy). On first boot the entrypoint copies
