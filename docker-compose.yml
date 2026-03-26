@@ -31,6 +31,8 @@ services:
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
       # Gemini API key — used for memory search embeddings
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # GitHub CLI (gh) auth — fine-grained PAT or classic token
+      GH_TOKEN: ${GH_TOKEN:-}
       # Browserless CDP URL — points at the companion container, with auth token
       BROWSERLESS_CDP_URL: http://browserless:3000?token=${BROWSERLESS_TOKEN:-openclaw-local}
     volumes:

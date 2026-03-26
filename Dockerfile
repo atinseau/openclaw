@@ -23,17 +23,32 @@ FROM ghcr.io/openclaw/openclaw:latest
 # Switch to root to install system packages
 USER root
 
-# ── Custom system packages ──────────────────────────────────────
-# Add any tools your skills or workflows need.
-# Uncomment or extend as needed.
+# ── Homebrew prerequisites (single apt layer) ───────────────────
+# build-essential is required by Homebrew. Cleaned up after brew
+# install to save ~200MB in the final image.
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      jq \
-      # python3 \
-      # python3-pip \
-      # ffmpeg \
-      # wget \
-    && rm -rf /var/lib/apt/lists/*
+      build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# ── Homebrew ─────────────────────────────────────────────────────
+# Installed as "node" user. All custom packages go through brew.
+ENV HOMEBREW_NO_AUTO_UPDATE=1 \
+    HOMEBREW_NO_INSTALL_CLEANUP=1 \
+    HOMEBREW_NO_ANALYTICS=1
+USER node
+RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:${PATH}"
+
+# ── Brew packages ───────────────────────────────────────────────
+# gh: required by the bundled "github" and "gh-issues" skills
+# jq: used by setup-config.sh for deep-merging seed config
+RUN brew install gh jq
+
+# ── Cleanup build-essential (no longer needed at runtime) ───────
+USER root
+RUN apt-get purge -y --auto-remove build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 # ── Custom skills ───────────────────────────────────────────────
 # Kept separate from bundled skills (/app/skills/) to avoid conflicts.
