@@ -91,8 +91,9 @@ const server = Bun.serve({
       })
     }
 
-    // Webhook routes: POST /webhooks/<provider>
-    const match = url.pathname.match(/^\/webhooks\/([a-z0-9_-]+)$/)
+    // Webhook routes: POST /webhooks/<provider> or POST /<provider>
+    // Traefik may strip the /webhooks prefix when forwarding — handle both.
+    const match = url.pathname.match(/^(?:\/webhooks)?\/([a-z0-9_-]+)$/)
     if (match && req.method === 'POST') {
       return handleWebhook(req, match[1])
     }
