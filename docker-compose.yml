@@ -6,10 +6,13 @@
 #
 # Required env vars (set in Coolify UI → Environment Variables):
 #   OPENCLAW_GATEWAY_TOKEN  — auth token for the Control UI + API
+#   OPENCLAW_HOOKS_TOKEN    — shared secret for the webhook-proxy → OpenClaw channel
+#   WEBHOOK_SECRET_GITHUB   — GitHub App webhook secret (HMAC verification)
 #
 # Ports:
 #   18789  — Gateway (API + Web UI)
 #   18790  — Bridge (ACP / IDE integrations)
+#   3001   — Webhook proxy (internal only, exposed via reverse proxy)
 
 services:
   openclaw-gateway:
@@ -42,6 +45,9 @@ services:
     ports:
       - "${OPENCLAW_GATEWAY_PORT:-18789}:18789"
       - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+    networks:
+      - internal-net
+      - proxy-net
     init: true
     restart: unless-stopped
     depends_on:
@@ -71,6 +77,43 @@ services:
       retries: 5
       start_period: 30s
 
+  # ── Webhook Proxy ───────────────────────────────────────────────
+  # Generic webhook receiver: validates signatures, transforms payloads,
+  # and forwards events to OpenClaw's /hooks/agent endpoint.
+  # Expose via your reverse proxy: /webhooks/* → webhook-proxy:3001
+  # Docs: see webhook-proxy/README.md
+  webhook-proxy:
+    build:
+      context: ./webhook-proxy
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3001"
+      # Internal OpenClaw URL (Docker network — never hits the public internet)
+      OPENCLAW_INTERNAL_URL: http://openclaw-gateway:18789
+      # Must match hooks.token in openclaw.json
+      OPENCLAW_HOOKS_TOKEN: ${OPENCLAW_HOOKS_TOKEN:?Set OPENCLAW_HOOKS_TOKEN in Coolify env vars}
+      # Provider secrets
+      WEBHOOK_SECRET_GITHUB: ${WEBHOOK_SECRET_GITHUB:-}
+    ports:
+      - "${WEBHOOK_PROXY_PORT:-3001}:3001"
+    networks:
+      - internal-net
+      - proxy-net
+    restart: unless-stopped
+    depends_on:
+      openclaw-gateway:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3001/healthz || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # ── Browserless — headless Chromium with CDP ───────────────────
   # Provides a remote CDP endpoint that OpenClaw connects to for
   # browser automation (snapshots, screenshots, click/type, etc.).
@@ -88,6 +131,8 @@ services:
       HEALTH: "true"
     # No host port needed — OpenClaw reaches Browserless via the
     # internal Docker network (http://browserless:3000).
+    networks:
+      - internal-net
     restart: unless-stopped
     healthcheck:
       test:
@@ -100,6 +145,14 @@ services:
       retries: 5
       start_period: 15s
 
+networks:
+  # Internal network — containers talk to each other, never exposed
+  internal-net:
+    internal: true
+  # Proxy network — exposed to the reverse proxy (Coolify/Traefik)
+  proxy-net:
+
 volumes:
+  openclaw-home:
   openclaw-config:
   openclaw-workspace:
