@@ -24,15 +24,17 @@ FROM ghcr.io/openclaw/openclaw:latest
 USER root
 
 # ── Homebrew prerequisites (single apt layer) ───────────────────
-# build-essential is required by Homebrew. Cleaned up after brew
-# install to save ~200MB in the final image.
+# build-essential is required by Homebrew, sudo is required by the
+# install script. Both are cleaned up after brew install.
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      build-essential && \
+      build-essential sudo && \
+    echo "node ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/node && \
     rm -rf /var/lib/apt/lists/*
 
 # ── Homebrew ─────────────────────────────────────────────────────
-# Installed as "node" user. All custom packages go through brew.
+# Official install script, run as "node" user.
+# All custom packages go through brew.
 ENV HOMEBREW_NO_AUTO_UPDATE=1 \
     HOMEBREW_NO_INSTALL_CLEANUP=1 \
     HOMEBREW_NO_ANALYTICS=1
