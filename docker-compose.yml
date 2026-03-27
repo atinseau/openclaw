@@ -47,7 +47,6 @@ services:
       - "${OPENCLAW_BRIDGE_PORT:-18790}:18790"
     networks:
       - internal-net
-      - proxy-net
     init: true
     restart: unless-stopped
     depends_on:
@@ -98,7 +97,6 @@ services:
       - "${WEBHOOK_PROXY_PORT:-3001}:3001"
     networks:
       - internal-net
-      - proxy-net
     restart: unless-stopped
     depends_on:
       openclaw-gateway:
@@ -149,8 +147,6 @@ networks:
   # Internal network — containers talk to each other, never exposed
   internal-net:
     internal: true
-  # Proxy network — exposed to the reverse proxy (Coolify/Traefik)
-  proxy-net:
 
 volumes:
   openclaw-home:
